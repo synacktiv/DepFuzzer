@@ -63,3 +63,13 @@ options:
 ## Found a bug or an idea ?
 
 If you found a bug or have an idea, don't hesitate to open an issue on this project !
+
+# Disclaimer
+
+This tool is not meant to find all dependencies confusion within projects. Furthermore, the tool is known to produce false positives due to the complexity of parsing requirements files.
+
+Always check manually if it's exploitable before taking actions.
+
+Please note that actually exploiting this vulnerability might have out of control side effects, so be careful.
+
+Synacktiv cannot be held responsible if the tool is used for malicious purposes, it's for educational purposes only.
