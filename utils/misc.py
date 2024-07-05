@@ -17,7 +17,7 @@ def dependency_exists(name, provider, session):
                             timeout=10)
         return output.status_code != 404
     except Exception:
-        print("[-] We have been rate limit, going to sleep for 5 minutes.")
+        print("[-] We have been rate limited, going to sleep for 5 minutes.")
         sleep(300) #this means the API drop our requests
         return None
 
@@ -32,6 +32,6 @@ def recover_dependencies(name, version, provider, session):
         return session.get(f"https://deps.dev/_/s/{provider}/p/{package}/v/{version}/dependencies"
                             , timeout=10)
     except Exception:
-        print("[-] We have been rate limit, going to sleep for 5 minutes.")
+        print("[-] We have been rate limited, going to sleep for 5 minutes.")
         sleep(300) #this means the API drop our requests
         return None

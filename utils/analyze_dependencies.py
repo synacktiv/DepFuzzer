@@ -1,5 +1,5 @@
 """
-File use to declare the analyzer for dependencies
+File used to declare the analyzer for dependencies
 """
 
 import requests
@@ -9,7 +9,7 @@ from utils.email_checker import EmailChecker
 
 class AnalyzeDependencies:
     """
-    Class use to analyze and recover all dependencies of environment
+    Class used to analyze and recover all dependencies of environment
     """
 
     def __init__(self, provider, dependencies, print_takeover, output, check_email):
@@ -26,7 +26,7 @@ class AnalyzeDependencies:
 
     def check_dependency(self, root_package, root_version):
         """
-        Method used to check if a dependency exist
+        Method used to check if a dependency exists
         """
         stack = []
         stack.append({root_package: root_version})
@@ -56,10 +56,10 @@ class AnalyzeDependencies:
                     if package is not None:
                         if "@" in package:
                             print(
-                                f"""[DEBUG] {package} is not declared but canno't be takeover because it belongs to an external organization\nYou might have to check manually if the organization exists."""
+                                f"""[DEBUG] {package} is not declared but cannot be taken over because it belongs to an external organization\nYou might have to check manually if the organization exists."""
                             )
                         else:
-                            print(f"[DEBUG] {package}:{version} might be takeover !")
+                            print(f"[DEBUG] {package}:{version} might be taken over !")
 
     def analyze_dependencies(self):
         """
@@ -82,29 +82,29 @@ class AnalyzeDependencies:
                 if r[0] not in self.email_takeover:
                     self.email_takeover.append(r[0])
                     print(
-                        f"""The account associate to dependency {package} is : {r[1]} and the domain {r[0]} might be purchase !"""
+                        f"""The account associated to dependency {package} is : {r[1]} and the domain {r[0]} might be purchased !"""
                     )
 
     def run(self):
         """
         Main method to run analysis
         """
-        print(f"[+] Starting analyze for {self.provider}...")
+        print(f"[+] Starting analysis for {self.provider}...")
         self.analyze_dependencies()
         if len(self.takeover) > 0:
             if self.output is not None:
                 with open(self.output, "w", encoding="utf-8") as fd:
                     for package, version in self.takeover.items():
                         fd.write(f"{package}:{version}\n")
-                print(f"Results save to {self.output} !")
+                print(f"Results saved to {self.output} !")
             else:
                 for package, version in self.takeover.items():
                     if package is not None:
                         if "@" in package:
                             print(
-                                f"""[+] {package} is not declared but canno't be takeover because it belongs to an external organization\nYou might have to check manually if the organization exists."""
+                                f"""[+] {package} is not declared but cannot be taken over because it belongs to an external organization\nYou might have to check manually if the organization exists."""
                             )
                         else:
-                            print(f"[+] {package}:{version} might be takeover !")
+                            print(f"[+] {package}:{version} might be taken over !")
         else:
-            print("[+] No package can be takeover !")
+            print("[+] No package can be taken over !")

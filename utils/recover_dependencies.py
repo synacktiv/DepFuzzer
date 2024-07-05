@@ -163,7 +163,7 @@ class RecoverDependencies:
 
     def run(self):
         """
-        Method use to run the right function to recover dependencies
+        Method used to run the right function to recover dependencies
         """
         print(f"[+] Processing repositories for {self.provider}")
         match self.provider:
