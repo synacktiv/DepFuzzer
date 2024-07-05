@@ -1,5 +1,5 @@
 """
-File use to declare the class used to check if an email exists
+File used to declare the class used to check if an email exists
 """
 
 import re
