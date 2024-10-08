@@ -73,3 +73,7 @@ Always check manually if it's exploitable before taking actions.
 Please note that actually exploiting this vulnerability might have out of control side effects, so be careful.
 
 Synacktiv cannot be held responsible if the tool is used for malicious purposes, it's for educational purposes only.
+
+# License
+
+This project is licensed under the MIT License - see the LICENSE file for details.
