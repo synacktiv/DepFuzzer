@@ -3,9 +3,10 @@ File used to declare the class used to check if an email exists
 """
 
 import re
-import socket
-import whois
+
+import dns.resolver
 import requests
+import whois
 
 class EmailChecker:
     """
@@ -68,8 +69,8 @@ class EmailChecker:
             if domain in self.known_domains:
                 continue
             try:
-                socket.gethostbyname(domain)
-            except socket.error:
+                dns.resolver.resolve(domain, "MX")
+            except (dns.resolver.NXDOMAIN, dns.resolver.NoAnswer, dns.resolver.NoNameservers,):
                 try:
                     res = whois.whois(domain)
                     if res["registrar"] is None:
@@ -80,4 +81,3 @@ class EmailChecker:
                     takeoverable.append([domain, email])
 
         return takeoverable
-    

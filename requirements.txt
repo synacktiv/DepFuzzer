@@ -3,3 +3,4 @@ requests==2.32.3
 pyfiglet==1.0.2
 python-whois==0.9.5
 defusedxml==0.7.1
+dnspython==2.8.0
