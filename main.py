@@ -32,16 +32,14 @@ def main():
 
     parser.add_argument('--print-takeover',
                         help="Don't wait the end of the script to display takeoverable modules",
-                        default=False,
-                        type=bool)
+                        action='store_true')
     parser.add_argument('--output-file',
                         help="File where results will be stored",
                         default=None,
                         type=str)
     parser.add_argument('--check-email',
                         help="Check if the email's owner of the dependency exists. Might be longer to analyze.",
-                        default=False,
-                        type=bool)
+                        action='store_true')
 
     args = parser.parse_args()
 
