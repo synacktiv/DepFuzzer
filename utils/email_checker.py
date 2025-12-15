@@ -21,7 +21,7 @@ class EmailChecker:
                            "cargo":"https://crates.io/api/v1/crates/%s"}
         self.known_domains = ["gmail.com","outlook.com","hotmail.com","protonmail.com"]
 
-    def get_emails(self):
+    def get_emails(self) -> list[str]:
         """
         Method used to make HTTP requests to recover the email
         """
@@ -32,7 +32,8 @@ class EmailChecker:
                     data = res.json()
                     match self.provider:
                         case "pypi":
-                            return [data.get("info").get("author_email")]
+                            if (info := data.get("info")) and (mail := info.get("author_email")):
+                                return [mail]
                         case "npm":
                             emails = []
                             if data.get("maintainers") is not None:
@@ -46,8 +47,7 @@ class EmailChecker:
                             return emails
             except Exception:
                 return []
-        else:
-            return []
+        return []
 
     def check_email(self):
         """
