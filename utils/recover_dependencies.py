@@ -223,6 +223,100 @@ class RecoverDependencies:
                                 version = ''
                             self.dependencies[package_name] = version
 
+    def get_nuget_dependencies(self):
+        """
+        Method used to recover all NuGet dependencies from .NET projects.
+        Supports:
+            - SDK-style <PackageReference> in csproj/fsproj/vbproj
+            - Central package management (Directory.Packages.props)
+            - Legacy packages.config files
+        """
+
+        project_files = []
+        for ext in ["csproj", "vbproj", "fsproj"]:
+            for filename in glob.glob(f"{self.path}/**/*.{ext}", recursive=True):
+                project_files.append(filename)
+
+        # Parse central package management: Directory.Packages.props
+        central_versions = {}
+
+        for props_file in glob.glob(f"{self.path}/**/Directory.Packages.props", recursive=True):
+            try:
+                dom = xml.parse(props_file)
+            except Exception:
+                continue
+
+            pkg_versions = dom.getElementsByTagName("PackageVersion")
+            for node in pkg_versions:
+                if node.hasAttribute("Include"):
+                    name = node.getAttribute("Include")
+                    version = ""
+
+                    if node.hasAttribute("Version"):
+                        version = node.getAttribute("Version")
+                    else:
+                        # <PackageVersion><Version>1.2.3</Version></PackageVersion>
+                        vnodes = node.getElementsByTagName("Version")
+                        if vnodes and vnodes[0].childNodes:
+                            version = vnodes[0].childNodes[0].data.strip()
+
+                    if name and version:
+                        central_versions[name] = version
+
+        # Parse modern SDK csproj references
+        for proj_file in project_files:
+            try:
+                dom = xml.parse(proj_file)
+            except Exception:
+                continue
+
+            pkg_refs = dom.getElementsByTagName("PackageReference")
+
+            for pkg in pkg_refs:
+                name = None
+                version = ""
+
+                if pkg.hasAttribute("Include"):
+                    name = pkg.getAttribute("Include")
+
+                if pkg.hasAttribute("Version"):
+                    version = pkg.getAttribute("Version")
+
+                # Nested version node
+                if not version:
+                    vnodes = pkg.getElementsByTagName("Version")
+                    if vnodes and vnodes[0].childNodes:
+                        version = vnodes[0].childNodes[0].data.strip()
+
+                # Use central version if needed
+                if name and not version:
+                    version = central_versions.get(name, "")
+
+                if name and version and name not in self.dependencies:
+                    self.dependencies[name] = version
+
+        # Parse legacy packages.config files
+        for pkgconfig_file in glob.glob(f"{self.path}/**/packages.config", recursive=True):
+            try:
+                dom = xml.parse(pkgconfig_file)
+            except Exception:
+                continue
+
+            pkgs = dom.getElementsByTagName("package")
+
+            for pkg in pkgs:
+                name = pkg.getAttribute("id") if pkg.hasAttribute("id") else None
+                version = pkg.getAttribute("version") if pkg.hasAttribute("version") else ""
+
+                # Store only if missing or not already defined by csproj
+                if name and name not in self.dependencies:
+                    self.dependencies[name] = version
+
+        # Merge central versions into unresolved entries
+        for name, version in list(self.dependencies.items()):
+            if (not version) and name in central_versions:
+                self.dependencies[name] = central_versions[name]
+
 
     def run(self):
         """
@@ -244,4 +338,6 @@ class RecoverDependencies:
                 self.get_gradle_dependencies()
             case "rubygems":
                 self.get_gem_dependencies()
+            case "nuget":
+                self.get_nuget_dependencies()
         print(f"[+] Found {len(self.dependencies)} {self.provider} dependencies")

@@ -6,6 +6,26 @@ from functools import cache
 from time import sleep
 import re
 
+NUGET_RESERVED_PREFIXES = [
+    "Microsoft",
+    "System",
+    "Azure",
+    "Serilog",
+    "Newtonsoft",
+    "Xamarin",
+    "xunit",
+    "OpenTelemetry",
+    "Spectre",
+    "Grpc",
+    "NuGet",
+    "Google",
+    "AWSSDK",
+    "Castle",
+    "Polly",
+    "Moq",
+    "AutoMapper"
+]
+
 @cache
 def dependency_exists(name, provider, session):
     """
@@ -50,3 +70,22 @@ def recover_dependencies(name, version, provider, session):
         print("[-] We have been rate limited, going to sleep for 5 minutes.")
         sleep(300) #this means the API drop our requests
         return None
+
+def is_nuget_package_reserved(package_id, reserved_prefixes):
+    """
+    Check if a NuGet package ID matches any reserved prefix.
+
+    Args:
+        package_id (str): The NuGet package ID to check.
+        reserved_prefixes (list[str]): List of reserved prefixes (case-insensitive).
+
+    Returns:
+        bool: True if package ID starts with any reserved prefix, False otherwise.
+    """
+    package_id_lower = package_id.lower()
+    for prefix in reserved_prefixes:
+        # Compare case-insensitively and allow prefix with dot or exact match
+        prefix_lower = prefix.lower()
+        if package_id_lower == prefix_lower or package_id_lower.startswith(f"{prefix_lower}."):
+            return True
+    return False

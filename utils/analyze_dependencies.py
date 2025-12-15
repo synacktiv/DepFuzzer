@@ -3,7 +3,7 @@ File used to declare the analyzer for dependencies
 """
 
 import requests
-from utils.misc import dependency_exists, recover_dependencies
+from utils.misc import dependency_exists, recover_dependencies, is_nuget_package_reserved, NUGET_RESERVED_PREFIXES
 from utils.email_checker import EmailChecker
 
 
@@ -30,6 +30,9 @@ class AnalyzeDependencies:
         """
         stack = []
         stack.append({root_package: root_version})
+        if "nuget" in self.provider and is_nuget_package_reserved(root_package, NUGET_RESERVED_PREFIXES):
+            return
+        
         while len(stack) != 0:
             package, version = list(stack.pop().items())[0]
             if package is not None and dependency_exists(package, self.provider, self.session):

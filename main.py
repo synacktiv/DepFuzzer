@@ -15,7 +15,7 @@ def main():
     print(f.renderText('DepFuzzer'))
     parser = argparse.ArgumentParser(prog='main.py', description='Dependency checker')
     parser.add_argument('--provider',
-                        choices=["npm","pypi","cargo","go","maven","gradle","rubygems","all"],
+                        choices=["npm","pypi","cargo","go","maven","gradle","rubygems","nuget","all"],
                         required=True,
                         type=str)
 
@@ -60,7 +60,7 @@ def main():
         dependencies_to_check = {name: version}
 
     if args.provider == "all":
-        providers = ["npm","pypi","cargo","go","maven","gradle","rubygems"]
+        providers = ["npm","pypi","cargo","go","maven","gradle","rubygems","nuget"]
         for provider in providers:
             rd = RecoverDependencies(args.path, provider)
             rd.run()
