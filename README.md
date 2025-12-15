@@ -49,7 +49,7 @@ ______          ______
           |_|
 
 usage: main.py [-h]
-               --provider {npm,pypi,cargo,go,maven,gradle,rubygems,all}
+               --provider {npm,pypi,cargo,go,maven,gradle,rubygems,nuget,all}
                (--path PATH | --dependency DEPENDENCY)
                [--print-takeover]
                [--output-file OUTPUT_FILE]
