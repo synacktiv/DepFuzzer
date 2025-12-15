@@ -39,34 +39,35 @@ Please note that the tool used a third-party called `deps.dev`, you might need t
 ## All possible arguments
 
 ```
-______          ______                      
-|  _  \         |  ___|                     
-| | | |___ _ __ | |_ _   _ ___________ _ __ 
+______          ______
+|  _  \         |  ___|
+| | | |___ _ __ | |_ _   _ ___________ _ __
 | | | / _ \ '_ \|  _| | | |_  /_  / _ \ '__|
-| |/ /  __/ |_) | | | |_| |/ / / /  __/ |   
-|___/ \___| .__/\_|  \__,_/___/___\___|_|   
-          | |                               
-          |_|                               
+| |/ /  __/ |_) | | | |_| |/ / / /  __/ |
+|___/ \___| .__/\_|  \__,_/___/___\___|_|
+          | |
+          |_|
 
-usage: main.py [-h] --provider {npm,pypi,cargo,go,maven,gradle,all}
-               (--path PATH | --dependency DEPENDENCY) [--print-takeover PRINT_TAKEOVER]
-               [--output-file OUTPUT_FILE] [--check-email CHECK_EMAIL]
+usage: main.py [-h]
+               --provider {npm,pypi,cargo,go,maven,gradle,rubygems,all}
+               (--path PATH | --dependency DEPENDENCY)
+               [--print-takeover]
+               [--output-file OUTPUT_FILE]
+               [--check-email]
 
 Dependency checker
 
 options:
   -h, --help            show this help message and exit
-  --provider {npm,pypi,cargo,go,maven,gradle,all}
+  --provider {npm,pypi,cargo,go,maven,gradle,rubygems,all}
   --path PATH           Path to folder(s) to analyze
   --dependency DEPENDENCY
                         Specify the name of one dependency to check. If you specify the version,
                         please use ':' to separate name and version.
-  --print-takeover PRINT_TAKEOVER
-                        Don't wait the end of the script to display takeoverable modules
+  --print-takeover      Don't wait the end of the script to display takeoverable modules
   --output-file OUTPUT_FILE
                         File where results will be stored
-  --check-email CHECK_EMAIL
-                        Check if the email's owner of the dependency exists. Might be longer to
+  --check-email         Check if the email's owner of the dependency exists. Might be longer to
                         analyze.
 ```
 
