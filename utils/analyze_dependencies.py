@@ -22,6 +22,7 @@ class AnalyzeDependencies:
         self.output = output
         self.check = check_email
         self.email_takeover = []
+        self.disposable_email_results: list[str] = []
         self.session = requests.Session()
 
     def check_dependency(self, root_package, root_version):
@@ -32,7 +33,7 @@ class AnalyzeDependencies:
         stack.append({root_package: root_version})
         if "nuget" in self.provider and is_nuget_package_reserved(root_package, NUGET_RESERVED_PREFIXES):
             return
-        
+
         while len(stack) != 0:
             package, version = list(stack.pop().items())[0]
             if package is not None and dependency_exists(package, self.provider, self.session):
@@ -80,13 +81,18 @@ class AnalyzeDependencies:
         """
         ec = EmailChecker(self.provider, package)
         res = ec.check_email()
-        if len(res) > 0:
-            for r in res:
-                if r[0] not in self.email_takeover:
-                    self.email_takeover.append(r[0])
-                    print(
-                        f"""The account associated to dependency {package} is : {r[1]} and the domain {r[0]} might be purchased !"""
-                    )
+        for r in res[0]:
+            if r[0] not in self.email_takeover:
+                self.email_takeover.append(r[0])
+                print(
+                    f"""The account associated to dependency {package} is : {r[1]} and the domain {r[0]} might be purchased !"""
+                )
+        for r in res[1]:
+            if r[1] not in self.disposable_email_results:
+                self.disposable_email_results.append(r[1])
+                print(
+                    f"Dependency {package} uses a disposable email provider: {r[1]}"
+                )
 
     def run(self):
         """

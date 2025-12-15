@@ -38,7 +38,7 @@ def main():
                         default=None,
                         type=str)
     parser.add_argument('--check-email',
-                        help="Check if the email's owner of the dependency exists. Might be longer to analyze.",
+                        help="Check if the email's owner of the dependency exists or points to a disposable email provider. Might be longer to analyze.",
                         action='store_true')
 
     args = parser.parse_args()
