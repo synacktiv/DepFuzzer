@@ -1,0 +1,9 @@
+[package]
+name = "my_project"
+version = "1.0.0"
+edition = "2025"
+
+[dependencies]
+serde = "1.0"
+rand = "0.8"
+fake_crate = "0.0.1"
