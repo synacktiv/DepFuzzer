@@ -82,16 +82,26 @@ class AnalyzeDependencies:
         ec = EmailChecker(self.provider, package)
         res = ec.check_email()
         for r in res[0]:
-            if r[0] not in self.email_takeover:
-                self.email_takeover.append(r[0])
+            # Handle both old format (2 elements) and new format (3 elements with role)
+            domain = r[0]
+            email = r[1]
+            role = r[2] if len(r) > 2 else "unknown"
+
+            if domain not in self.email_takeover:
+                self.email_takeover.append(domain)
                 print(
-                    f"""The account associated to dependency {package} is : {r[1]} and the domain {r[0]} might be purchased !"""
+                    f"""The account associated to dependency {package} is : {email} ({role}) and the domain {domain} might be purchased !"""
                 )
         for r in res[1]:
-            if r[1] not in self.disposable_email_results:
-                self.disposable_email_results.append(r[1])
+            # Handle both old format (2 elements) and new format (3 elements with role)
+            domain = r[0]
+            email = r[1]
+            role = r[2] if len(r) > 2 else "unknown"
+
+            if email not in self.disposable_email_results:
+                self.disposable_email_results.append(email)
                 print(
-                    f"Dependency {package} uses a disposable email provider: {r[1]}"
+                    f"Dependency {package} uses a disposable email provider: {email} ({role})"
                 )
 
     def run(self):

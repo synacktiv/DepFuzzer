@@ -21,36 +21,85 @@ class RecoverDependencies:
         """
         Method used to recover all NPM dependencies from projects
         """
-        packages_json = []
-        for filename in glob.glob(f"{self.path}/**/package.json", recursive=True):
-            packages_json.append(filename)
+        # First, try to find package-lock.json files (more accurate)
+        lock_files = []
+        for filename in glob.glob(f"{self.path}/**/package-lock.json", recursive=True):
+            if "node_modules" not in filename:
+                lock_files.append(filename)
 
-        for package_json in packages_json:
-            with open(package_json,"r",encoding="utf-8") as fd:
-                content = json.loads(fd.read())
+        # Process package-lock.json files if they exist
+        for lock_file in lock_files:
+            with open(lock_file, "r", encoding="utf-8") as fd:
+                lock_content = json.loads(fd.read())
 
-            if content.get("workspaces"):
-                for custom_package in content.get("workspaces")["packages"]:
-                    for filename in glob.glob(f"{self.path}/**/{custom_package}", recursive=True):
-                        self.to_exclude.append(filename.split(custom_package.split("/")[0])[1].replace("/",""))
+            # Extract dependencies from package-lock.json
+            if lock_content.get("packages"):
+                for package_path, package_info in lock_content["packages"].items():
+                    # Skip root package (empty string key) and node_modules paths
+                    if package_path and not package_path.startswith("node_modules/"):
+                        continue
 
-            if content.get("dependencies"):
-                names = content["dependencies"].keys()
-                for name in names:
-                    if (self.dependencies.get(name) is None
-                        and "https" not in content["dependencies"][name]
-                        and "git" not in content["dependencies"][name]
-                        and name not in self.to_exclude):
-                        self.dependencies[name] = content["dependencies"][name]
+                    # Extract package name from node_modules path
+                    if package_path.startswith("node_modules/"):
+                        package_name = package_path.replace("node_modules/", "")
+                        # Handle scoped packages (e.g., @types/node)
+                        if package_name.count("/") > 0 and not package_name.startswith("@"):
+                            continue  # Skip nested dependencies
 
-            if content.get("devDependencies"):
-                names = content["devDependencies"].keys()
-                for name in names:
-                    if (self.dependencies.get(name) is None
-                        and "https" not in content["devDependencies"][name]
-                        and "git" not in content["devDependencies"][name]
-                        and name not in self.to_exclude):
-                        self.dependencies[name] = content["devDependencies"][name]
+                        version = package_info.get("version", "")
+                        if package_name and version and package_name not in self.dependencies:
+                            self.dependencies[package_name] = version
+
+            # Also check legacy dependencies format in package-lock.json
+            if lock_content.get("dependencies"):
+                for name, info in lock_content["dependencies"].items():
+                    version = info.get("version", "")
+                    if name not in self.dependencies and version:
+                        self.dependencies[name] = version
+
+        # If no lock files found, fall back to package.json files
+        if not lock_files:
+            packages_json = []
+            for filename in glob.glob(f"{self.path}/**/package.json", recursive=True):
+                # Skip package.json files in node_modules directories
+                if "node_modules" not in filename:
+                    packages_json.append(filename)
+
+            for package_json in packages_json:
+                with open(package_json,"r",encoding="utf-8") as fd:
+                    content = json.loads(fd.read())
+
+                if content.get("workspaces"):
+                    workspaces = content.get("workspaces")
+                    # workspaces can be an array or an object with "packages" key
+                    if isinstance(workspaces, list):
+                        packages = workspaces
+                    elif isinstance(workspaces, dict) and workspaces.get("packages"):
+                        packages = workspaces["packages"]
+                    else:
+                        packages = []
+
+                    for custom_package in packages:
+                        for filename in glob.glob(f"{self.path}/**/{custom_package}", recursive=True):
+                            self.to_exclude.append(filename.split(custom_package.split("/")[0])[1].replace("/",""))
+
+                if content.get("dependencies"):
+                    names = content["dependencies"].keys()
+                    for name in names:
+                        if (self.dependencies.get(name) is None
+                            and "https" not in content["dependencies"][name]
+                            and "git" not in content["dependencies"][name]
+                            and name not in self.to_exclude):
+                            self.dependencies[name] = content["dependencies"][name]
+
+                if content.get("devDependencies"):
+                    names = content["devDependencies"].keys()
+                    for name in names:
+                        if (self.dependencies.get(name) is None
+                            and "https" not in content["devDependencies"][name]
+                            and "git" not in content["devDependencies"][name]
+                            and name not in self.to_exclude):
+                            self.dependencies[name] = content["devDependencies"][name]
 
     def get_cargo_dependencies(self):
         """
@@ -189,7 +238,7 @@ class RecoverDependencies:
         buildgradle_files = []
         for filename in glob.glob(f"{self.path}/**/build.gradle", recursive=True):
             buildgradle_files.append(filename)
-        
+
         for buildgradle_file in buildgradle_files:
             with open(buildgradle_file, 'r') as file:
                 gradle_content = file.read()
